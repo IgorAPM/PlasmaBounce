@@ -32,7 +32,7 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, Category="Components")
 	UHealthComponent* HealthComponent;
 
-	UPROPERTY(VisibleDefaultsOnly, Category="Components")
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	UWidgetComponent* WidgetComponent;
 
 	UFUNCTION()
