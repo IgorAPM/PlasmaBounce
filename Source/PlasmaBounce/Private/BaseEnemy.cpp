@@ -29,6 +29,7 @@ ABaseEnemy::ABaseEnemy()
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	HealthComponent->OnHealthChanged.AddDynamic(this, &ABaseEnemy::HandleTakeDamage);
+	HealthComponent->OnDeath.AddDynamic(this, &ABaseEnemy::Die);
 }
 
 // Called when the game starts or when spawned
@@ -40,15 +41,10 @@ void ABaseEnemy::BeginPlay()
 void ABaseEnemy::HandleTakeDamage(UHealthComponent* ThisHealthComponent, float Health, float HealthDelta,
 	const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	UE_LOG(LogTemp, Log, TEXT("Health Changed: %s"), *FString::SanitizeFloat(Health));
-	
-	if(Health <= 0)
-	{
-		this->Die();		
-	}
+
 }
 
-void ABaseEnemy::Die()
+void ABaseEnemy::Die(UHealthComponent* ThisHealthComponent, AController* InstigatedBy)
 {
 	this->Destroy();
 }

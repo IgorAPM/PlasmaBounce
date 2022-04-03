@@ -49,9 +49,14 @@ void UHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, c
 	Health =  FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
 	UE_LOG(LogTemp, Log, TEXT("Health Changed: %s"), *FString::SanitizeFloat(Health));
 
+	OnHealthChanged.Broadcast(this,Health,Damage,DamageType,InstigatedBy, DamageCauser);
+
 	bIsDead = Health <= 0;
 
-	OnHealthChanged.Broadcast(this,Health,Damage,DamageType,InstigatedBy, DamageCauser);
+	if(bIsDead)
+	{
+		OnDeath.Broadcast(this, InstigatedBy);
+	}
 }
 
 void UHealthComponent::Heal(float HealAmount)

@@ -39,7 +39,7 @@ protected:
 	void HandleTakeDamage(UHealthComponent* ThisHealthComponent, float Health, float HealthDelta, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
 
 	UFUNCTION()
-	void Die();
+	void Die(UHealthComponent* ThisHealthComponent, AController* InstigatedBy);
 
 public:	
 	// Called every frame
