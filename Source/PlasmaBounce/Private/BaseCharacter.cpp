@@ -2,6 +2,8 @@
 
 
 #include "BaseCharacter.h"
+#include "BaseProjectile.h"
+#include "Components/ArrowComponent.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
@@ -13,13 +15,41 @@ ABaseCharacter::ABaseCharacter()
 	bCanFire = true;
 	RateOfFire = 0.2;
 
+	ShotRoot = CreateDefaultSubobject<UArrowComponent>(TEXT("ShotRoot"));
+	ShotRoot->SetupAttachment(RootComponent);
+
+	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
+	SkeletalMesh->SetCanEverAffectNavigation(false);
+	SkeletalMesh->SetupAttachment(RootComponent);
+
+	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
+	WeaponMesh->SetCanEverAffectNavigation(false);
+	WeaponMesh->SetupAttachment(SkeletalMesh, "WeaponSocket");
 }
 
 // Called when the game starts or when spawned
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	for(int i = 0; i < ProjectileCount; i++)
+	{
+		AddProjectile();
+	}
 	
+}
+
+void ABaseCharacter::AddProjectile()
+{
+	FActorSpawnParameters SpawnParameters;
+
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	const FTransform SpawnTransform = ShotRoot->GetComponentTransform();
+		
+	ABaseProjectile* Projectile = GetWorld()->SpawnActor<ABaseProjectile>(ProjectileClass,SpawnTransform,SpawnParameters);
+
+	ProjectilePool.Add(Projectile);
 }
 
 void ABaseCharacter::Turn(float Value)
@@ -33,14 +63,20 @@ void ABaseCharacter::Turn(float Value)
 void ABaseCharacter::Aim()
 {
 	bIsAiming = true;
+	UE_LOG(LogTemp, Log, TEXT("Is Aiming"));
 }
 
 void ABaseCharacter::Fire()
 {
 	bIsAiming = false;
+	
 	if(bCanFire)
 	{
-		
+		if(ProjectileClass)
+		{
+			bCanFire = false;
+			FireAllProjectiles();
+		}
 	}
 }
 
@@ -65,7 +101,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAxis("Turn", this, &ABaseCharacter::Turn);
 	PlayerInputComponent->BindAction("Aim/Fire", IE_Pressed, this,&ABaseCharacter::Aim);
-	PlayerInputComponent->BindAction("Aim/Fire", IE_Pressed, this,&ABaseCharacter::Fire);
+	PlayerInputComponent->BindAction("Aim/Fire", IE_Released, this,&ABaseCharacter::Fire);
 	
 }
 
